@@ -1,0 +1,13 @@
+/* Interactive company targets and pointer-only hero cursor refinements. */
+.company-galaxy{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:18px var(--pad) 0;max-width:1500px;margin:0 auto}
+.company-galaxy .company-pill{appearance:none;min-height:36px;flex:0 0 auto;background:linear-gradient(145deg,rgba(42,31,58,.95),rgba(26,19,39,.94));border-color:rgba(177,151,217,.18);box-shadow:inset 0 0 18px rgba(155,117,219,.035);cursor:pointer}
+.company-galaxy .company-pill:hover,.company-galaxy .company-pill.is-focused{box-shadow:0 0 18px rgba(214,250,80,.1),inset 0 0 18px rgba(214,250,80,.055)}
+.company-galaxy .company-pill:focus-visible{outline:2px solid var(--yellow);outline-offset:3px}
+.company-galaxy .company-symbol{width:20px;height:20px;display:grid;place-items:center;border-radius:50%;background:rgba(165,138,255,.12);color:#c4aaff}
+.company-galaxy .company-pill.is-focused .company-symbol{background:var(--yellow);color:#17151d}
+.company-note strong{color:var(--yellow);font-weight:700}
+.energy-cursor{width:48px;height:54px;filter:drop-shadow(0 0 12px rgba(197,173,255,.68))}
+.energy-cursor svg{width:39px;height:42px}
+.energy-cursor>span{width:8px;height:8px;left:26px;top:31px;box-shadow:0 0 15px var(--energy-accent,var(--yellow)),0 0 28px rgba(165,138,255,.8)}
+@media(hover:hover) and (pointer:fine){.hero-energy{cursor:none}.hero-energy .energy-core-trigger,.hero-energy .energy-drive-message>button{cursor:none}}
+@media(max-width:760px){.company-galaxy{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x proximity;padding:15px 18px 5px;scrollbar-width:none}.company-galaxy::-webkit-scrollbar{display:none}.company-galaxy .company-pill{scroll-snap-align:start}.company-note{line-height:1.6;padding:0 18px}}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import {
   ArrowDownRight, ArrowRight, ArrowUpRight, AudioLines, Award, BarChart3,
   BookOpen, BrainCircuit, Check, ChevronDown, CircleHelp, Code2, Command,
@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 
 type IconComponent = typeof ArrowRight;
+const PlacementOS = lazy(() => import('./components/PlacementOS'));
+const HeroEnergyScene = lazy(() => import('./components/HeroEnergyScene'));
 
 const companies = [
   'Google', 'Microsoft', 'Amazon', 'TCS', 'Infosys', 'Wipro', 'Cognizant',
@@ -67,12 +69,44 @@ function App() {
   const [checkedTasks, setCheckedTasks] = useState<number[]>([]);
   const [companyFocus, setCompanyFocus] = useState('Amazon');
   const [previewRun, setPreviewRun] = useState(false);
+  const [missionPulse, setMissionPulse] = useState(0);
+
+  const launchMission = () => {
+    setMissionPulse((pulse) => pulse + 1);
+    document.querySelector('#mission-dashboard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    const buttons = document.querySelectorAll<HTMLElement>('.hero-magnetic');
+    const cleanups: (() => void)[] = [];
+    buttons.forEach((button) => {
+      const onMove = (event: PointerEvent) => {
+        if (event.pointerType === 'touch') return;
+        const rect = button.getBoundingClientRect();
+        const x = (event.clientX - rect.left - rect.width / 2) / rect.width;
+        const y = (event.clientY - rect.top - rect.height / 2) / rect.height;
+        button.style.setProperty('--mag-x', `${x * 5}px`);
+        button.style.setProperty('--mag-y', `${y * 4}px`);
+      };
+      const reset = () => {
+        button.style.setProperty('--mag-x', '0px');
+        button.style.setProperty('--mag-y', '0px');
+      };
+      button.addEventListener('pointermove', onMove, { passive: true });
+      button.addEventListener('pointerleave', reset, { passive: true });
+      cleanups.push(() => {
+        button.removeEventListener('pointermove', onMove);
+        button.removeEventListener('pointerleave', reset);
+      });
+    });
+    return () => cleanups.forEach((cleanup) => cleanup());
   }, []);
 
   useEffect(() => {
@@ -101,6 +135,8 @@ function App() {
         <nav className="nav-shell" aria-label="Main navigation">
           <a className="brand" href="#top" aria-label="Dkoder home"><span className="brand-mark"><Command size={18} strokeWidth={2.6} /></span><span>dkoder<span className="brand-period">.</span></span></a>
           <div className={`nav-links${menuOpen ? ' nav-links-open' : ''}`}>
+            <a href="#top" onClick={closeMenu}>Home</a>
+            <a href="#mission-dashboard" onClick={closeMenu}>Mission</a>
             <a href="#practice" onClick={closeMenu}>Practice</a>
             <a href="#features" onClick={closeMenu}>Courses</a>
             <a href="#companies" onClick={closeMenu}>Companies</a>
@@ -118,39 +154,29 @@ function App() {
           <div className="hero-grid" aria-hidden="true" />
           <div className="hero-orbit orbit-one" aria-hidden="true" /><div className="hero-orbit orbit-two" aria-hidden="true" />
           <div className="hero-copy">
-            <div className="eyebrow"><span className="eyebrow-dot" /> YOUR PLACEMENT PREP, IN FOCUS</div>
-            <h1>Make your<br /><span>next move</span><br />count<span className="hero-period">.</span></h1>
-            <p className="hero-subtitle">A clearer path to your dream job. Practise coding, aptitude and interview questions—with your target in sight.</p>
-            <div className="hero-actions"><a className="button button-yellow" href="https://dkoder.co.in/auth/signup">Start preparing <ArrowRight size={17} /></a><a className="button button-quiet" href="#story">Explore Dkoder <ArrowDownRight size={17} /></a></div>
+            <div className="eyebrow"><span className="eyebrow-dot" /> THE FUTURE OF PLACEMENT PREPARATION</div>
+            <h1>Your dream job.<br /><span>Your next move.</span></h1>
+            <p className="hero-subtitle">Build your company-focused preparation plan, practise smarter, track your progress, and move closer to your career goals with Dkoder.</p>
+            <div className="hero-actions"><button className="button button-yellow hero-magnetic" type="button" onClick={launchMission}>Build my placement mission <ArrowRight size={17} /></button><a className="button button-quiet hero-magnetic" href="#companies">Explore companies <ArrowDownRight size={17} /></a></div>
             <div className="hero-undertext"><span className="mini-check"><Check size={12} /></span> Built for students. Designed for placements.</div>
           </div>
-          <div className="hero-visual" aria-label="Illustrative Dkoder placement preparation dashboard">
-            <div className="visual-glow" />
-            <div className="float-chip chip-target"><Target size={14} /><span>TARGET LOCKED</span><b>₹10 LPA</b></div>
-            <div className="float-chip chip-xp"><Zap size={14} fill="currentColor" /><b>+250 XP</b><span>SESSION COMPLETE</span></div>
-            <div className="float-chip chip-streak"><Flame size={15} /><b>14</b><span>DAY STREAK</span></div>
-            <div className="command-card">
-              <div className="command-top"><div className="window-dots"><i /><i /><i /></div><span>PREP / OVERVIEW</span><span className="live-indicator"><i /> DEMO</span></div>
-              <div className="command-greeting"><div><span className="muted-label">TUESDAY, YOUR NEXT MOVE</span><h3>Keep the momentum.</h3></div><div className="avatar-orbit"><Target size={21} /></div></div>
-              <div className="target-strip"><span className="company-glyph">A</span><div><small>PREPARING FOR</small><strong>Amazon · SDE</strong></div><span className="target-arrow"><ArrowUpRight size={16} /></span></div>
-              <div className="command-stats">
-                <div className="skill-row"><span>Coding</span><div className="skill-track"><i style={{ width: '78%' }} /></div><b>78%</b></div>
-                <div className="skill-row"><span>Aptitude</span><div className="skill-track"><i style={{ width: '86%' }} /></div><b>86%</b></div>
-                <div className="skill-row"><span>Interview</span><div className="skill-track"><i style={{ width: '64%' }} /></div><b>64%</b></div>
-              </div>
-              <div className="next-challenge"><div className="challenge-icon"><Code2 size={17} /></div><div><small>NEXT CHALLENGE</small><strong>Arrays <span>·</span> Medium</strong></div><button type="button" aria-label="Open practice section" onClick={() => document.querySelector('#practice')?.scrollIntoView({ behavior: 'smooth' })}><ArrowRight size={17} /></button></div>
-              <div className="command-footer"><span><Zap size={12} /> 12,480 XP</span><span><span className="rank-spark">✳</span> RANK #24</span><span>ILLUSTRATIVE UI</span></div>
-            </div>
-            <div className="orbit-label label-left">GOAL <span>→</span> PRACTICE</div><div className="orbit-label label-right">IMPROVE <span>→</span> REPEAT</div>
+          <div className="hero-visual" aria-label="Interactive Dkoder Placement Intelligence Core. Click the central core to activate Energy Drive.">
+            <Suspense fallback={<div className="hero-energy-placeholder" aria-label="Loading Dkoder's interactive placement core"><span><Sparkles size={17} /> Initializing placement core</span></div>}>
+              <HeroEnergyScene selectedCompany={companyFocus} missionPulse={missionPulse} onBuildMission={launchMission} />
+            </Suspense>
           </div>
           <a className="scroll-cue" href="#story"><span>SCROLL TO FIND YOUR FOCUS</span><div><ArrowDownRight size={15} /></div></a>
         </section>
 
         <section className="company-strip" id="companies" aria-label="Companies with tagged preparation topics">
-          <div className="strip-heading"><span>YOUR TARGET, YOUR PRACTICE</span><a href="#target">Explore target planner <ArrowRight size={14} /></a></div>
-          <div className="marquee-frame"><div className="marquee-track" aria-hidden="true">{[...companies, ...companies].map((name, index) => <button className={`company-pill${companyFocus === name ? ' is-focused' : ''}`} type="button" key={`${name}-${index}`} onClick={() => { setCompanyFocus(name); setCompany(name); }}><span className="company-symbol">{name.slice(0, 1)}</span>{name}<ArrowUpRight size={12} /></button>)}</div></div>
-          <p className="company-note">Company names are preparation targets only; no employer affiliation is implied.</p>
+          <div className="strip-heading"><span>CHOOSE YOUR PREPARATION TARGET</span><a href="#target">Open target planner <ArrowRight size={14} /></a></div>
+          <div className="company-galaxy" role="group" aria-label="Select a company preparation target">{companies.map((name) => <button className={`company-pill${companyFocus === name ? ' is-focused' : ''}`} key={name} type="button" aria-pressed={companyFocus === name} onClick={() => { setCompanyFocus(name); setCompany(name); }}><span className="company-symbol">{name.slice(0, 1)}</span>{name}<ArrowUpRight size={12} /></button>)}</div>
+          <p className="company-note" aria-live="polite"><strong>{companyFocus}</strong> selected · Company names are preparation targets only; no employer affiliation is implied.</p>
         </section>
+
+        <Suspense fallback={<section className="placement-os-loading" id="mission-dashboard">Loading the interactive placement command center…</section>}>
+          <PlacementOS selectedCompany={companyFocus} onCompanyChange={setCompanyFocus} />
+        </Suspense>
 
         <section className="story-section section-wrap" id="story">
           <div className="section-kicker" data-reveal><span>01 / FIND YOUR FOCUS</span><span className="kicker-line" /></div>
